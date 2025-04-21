@@ -268,6 +268,112 @@
                 padding: 1.5rem;
             }
         }
+
+        .welcome-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .user-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            border: 4px solid var(--accent-color);
+            box-shadow: 0 0 20px rgba(88, 101, 242, 0.3);
+        }
+
+        .welcome-text {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .welcome-description {
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        .request-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .request-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .request-btn:hover {
+            background: var(--hover-color);
+            transform: translateY(-2px);
+        }
+
+        .request-form {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .request-form.visible {
+            display: block;
+        }
+
+        .difficulty-select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .difficulty-select option {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .cooldown-message {
+            color: #ff6b6b;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Обновленные стили для профиля */
+        .user-profile {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-profile.visible {
+            display: flex;
+        }
+
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body>
@@ -295,27 +401,50 @@
         </div>
 
         <div id="userProfile" class="user-profile">
-            <img src="" alt="User Avatar" class="user-avatar">
+            <img src="" alt="User Avatar" class="user-avatar-small">
             <div class="user-info">
                 <div class="user-name"></div>
             </div>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
 
-        <form id="levelRequestForm" class="level-request-form">
-            <div class="form-group">
-                <label for="levelId">Level ID</label>
-                <input type="text" id="levelId" required placeholder="Enter your level ID">
+        <div id="welcomeContainer" class="welcome-container" style="display: none;">
+            <img src="" alt="User Avatar" class="user-avatar-large">
+            <h2 class="welcome-text">Hi, <span class="user-name"></span>!</h2>
+            <p class="welcome-description">Here you can send level to moderators and they rate your level.</p>
+            
+            <div class="request-buttons">
+                <button class="request-btn" onclick="showNormalRequest()">Normal Request</button>
+                <button class="request-btn" onclick="showDemonRequest()">Demon Request</button>
+                <button class="request-btn" onclick="showRequests()">View Requests</button>
             </div>
+        </div>
+
+        <form id="normalRequestForm" class="request-form">
+            <h3 style="margin-bottom: 1.5rem;">Normal Level Request</h3>
             <div class="form-group">
                 <label for="levelName">Level Name</label>
-                <input type="text" id="levelName" required placeholder="Enter your level name">
+                <input type="text" id="levelName" required placeholder="Enter level name">
             </div>
             <div class="form-group">
-                <label for="description">Description</label>
-                <textarea id="description" rows="4" placeholder="Describe your level..."></textarea>
+                <label for="levelId">Level ID</label>
+                <input type="text" id="levelId" required placeholder="Enter level ID">
             </div>
-            <button type="submit" class="submit-btn">Submit Level</button>
+            <div class="form-group">
+                <label for="difficulty">Request Difficulty</label>
+                <select id="difficulty" class="difficulty-select" required>
+                    <option value="">Select difficulty</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Hard">Hard</option>
+                    <option value="Harder">Harder</option>
+                    <option value="Insane">Insane</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">Submit Request</button>
+            <p id="cooldownMessage" class="cooldown-message" style="display: none;">
+                You need to wait 4 hours between requests.
+            </p>
         </form>
     </div>
 
@@ -323,7 +452,20 @@
     <script>
         const DISCORD_CLIENT_ID = '1363791587225895013';
         const DISCORD_REDIRECT_URI = 'https://gdps.ayrich.fun/lvlreq.html';
+        const API_URL = '/api/level-request'; // URL для API бота
         
+        let lastRequestTime = localStorage.getItem('lastRequestTime');
+
+        function checkCooldown() {
+            if (!lastRequestTime) return true;
+            
+            const now = Date.now();
+            const timePassed = now - parseInt(lastRequestTime);
+            const fourHours = 4 * 60 * 60 * 1000;
+            
+            return timePassed >= fourHours;
+        }
+
         // Функция для получения параметров из URL
         function getUrlParams() {
             const params = new URLSearchParams(window.location.search);
@@ -412,15 +554,20 @@
         function showUserProfile(user) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('userProfile').classList.add('visible');
-            document.getElementById('levelRequestForm').classList.add('visible');
+            document.getElementById('welcomeContainer').style.display = 'block';
 
-            const userProfile = document.getElementById('userProfile');
+            // Обновляем все элементы с аватаркой и именем пользователя
             const avatarUrl = user.avatar 
                 ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` 
                 : 'https://cdn.discordapp.com/embed/avatars/0.png';
             
-            userProfile.querySelector('.user-avatar').src = avatarUrl;
-            userProfile.querySelector('.user-name').textContent = user.username;
+            document.querySelectorAll('.user-avatar-small, .user-avatar-large').forEach(img => {
+                img.src = avatarUrl;
+            });
+            
+            document.querySelectorAll('.user-name').forEach(el => {
+                el.textContent = user.username;
+            });
         }
 
         function logout() {
@@ -443,12 +590,31 @@
             localStorage.removeItem('discord_user');
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('userProfile').classList.remove('visible');
-            document.getElementById('levelRequestForm').classList.remove('visible');
+            document.getElementById('welcomeContainer').style.display = 'none';
+            document.getElementById('normalRequestForm').classList.remove('visible');
+        }
+
+        function showNormalRequest() {
+            document.getElementById('normalRequestForm').classList.add('visible');
+        }
+
+        function showDemonRequest() {
+            // TODO: Implement demon request form
+        }
+
+        function showRequests() {
+            // TODO: Implement requests view
         }
 
         // Обработка отправки формы
-        document.getElementById('levelRequestForm').addEventListener('submit', async (e) => {
+        document.getElementById('normalRequestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            if (!checkCooldown()) {
+                document.getElementById('cooldownMessage').style.display = 'block';
+                return;
+            }
+
             const userData = JSON.parse(localStorage.getItem('discord_user'));
             
             if (!userData || !userData.access_token) {
@@ -458,19 +624,39 @@
             }
 
             const levelData = {
-                id: document.getElementById('levelId').value,
                 name: document.getElementById('levelName').value,
-                description: document.getElementById('description').value,
+                id: document.getElementById('levelId').value,
+                difficulty: document.getElementById('difficulty').value,
                 user: {
                     id: userData.id,
                     username: userData.username,
                     avatar: userData.avatar
-                }
+                },
+                type: 'normal'
             };
 
-            // Здесь будет отправка данных на сервер
-            console.log('Submitting level:', levelData);
-            // TODO: Добавить отправку на сервер
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userData.access_token}`
+                    },
+                    body: JSON.stringify(levelData)
+                });
+
+                if (response.ok) {
+                    localStorage.setItem('lastRequestTime', Date.now().toString());
+                    alert('Your request has been sent successfully!');
+                    e.target.reset();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Failed to send request');
+                }
+            } catch (error) {
+                console.error('Error sending request:', error);
+                alert('Failed to send request. Please try again later.');
+            }
         });
     </script>
 </body>
