@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubi GDPS Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <nav class="nav-container">
+            <div class="logo">Cubi GDPS</div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="rating-system.html">Rating System</a></li>
+                <li><a href="lvlreq.html">Level Request</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <h1>Welcome to Cubi GDPS</h1>
+            
+            <!-- Main Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn download-btn">
+                    <i class="fas fa-download"></i>
+                    Download GDPS
+                </button>
+                <button class="action-btn discord-btn">
+                    <i class="fab fa-discord"></i>
+                    Join Discord
+                </button>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h3>Total Levels</h3>
+                    <p>0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Players</h3>
+                    <p>0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Daily Active</h3>
+                    <p>0</p>
+                </div>
+            </div>
+            <div class="update-info">
+                <p>Updates every day!</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Download Modal -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Choose Your Platform</h2>
+            <div class="platform-buttons">
+                <a href="assets/Cubi GDPS.zip" class="platform-btn windows-btn" download>
+                    <svg class="platform-icon" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M0 12.402l35.687-4.86.016 34.423-35.67.203zm35.67 33.529l.028 34.453L.028 75.48.026 45.7zm4.326-39.025L87.314 0v41.527l-47.318.376zm47.329 39.349l-.011 41.34-47.318-6.677-.066-34.739z"/>
+                    </svg>
+                    <span>Windows</span>
+                </a>
+                <a href="assets/Cubi GDPS.apk" class="platform-btn android-btn" download>
+                    <svg class="platform-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.6,9.48l1.84-3.18c0.16-0.31,0.04-0.69-0.26-0.85c-0.29-0.15-0.65-0.06-0.83,0.22l-1.88,3.24 c-2.86-1.21-6.08-1.21-8.94,0L5.65,5.67c-0.19-0.29-0.58-0.38-0.87-0.2C4.5,5.65,4.41,6.01,4.56,6.3L6.4,9.48 C3.3,11.25,1.28,14.44,1,18h22C22.72,14.44,20.7,11.25,17.6,9.48z M7,15.25c-0.69,0-1.25-0.56-1.25-1.25 c0-0.69,0.56-1.25,1.25-1.25S8.25,13.31,8.25,14C8.25,14.69,7.69,15.25,7,15.25z M17,15.25c-0.69,0-1.25-0.56-1.25-1.25 c0-0.69,0.56-1.25,1.25-1.25s1.25,0.56,1.25,1.25C18.25,14.69,17.69,15.25,17,15.25z"/>
+                    </svg>
+                    <span>Android</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Cubi GDPS. All rights reserved.</p>
+    </footer>
+
+    <!-- Font Awesome только для иконок Discord и Download -->
+    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

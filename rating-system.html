@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubi GDPS Rating System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: rgba(43, 45, 49, 0.95);
+            --text-color: #ffffff;
+            --progress-color: #5c7cfa;
+            --accent-color: #5865F2;
+            --hover-color: #7289DA;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(90deg, #9091a6 0%, #5d4c5c 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="black" opacity="0.5"/></svg>');
+            opacity: 0.7;
+            z-index: 1;
+        }
+
+        .header {
+            position: relative;
+            z-index: 10;
+            background: rgba(43, 45, 49, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-section img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #fff, #5c7cfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .logo-text:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 80%;
+        }
+
+        .nav-links a:hover {
+            background: rgba(88, 101, 242, 0.1);
+            color: var(--accent-color);
+        }
+
+        .nav-links a.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .nav-links a.active:hover {
+            background: var(--hover-color);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 0.8rem;
+            }
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background-color: rgba(43, 45, 49, 0.9);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-button img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-button.active {
+            background: linear-gradient(90deg, #9091a6 0%, #5d4c5c 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .rating-container {
+            background-color: var(--primary-color);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            margin: 0 auto;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--text-color);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .description {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-item {
+            margin-bottom: 20px;
+        }
+
+        .progress-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9091a6 0%, #5d4c5c 100%);
+            transition: width 1s ease-in-out;
+        }
+
+        .progress-text {
+            float: right;
+            color: #ccc;
+            font-weight: normal;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            text-align: center;
+            background: rgba(43, 45, 49, 0.7);
+            backdrop-filter: blur(5px);
+            color: #fff;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            z-index: 100;
+        }
+
+        .footer span {
+            color: #5c7cfa;
+            font-weight: bold;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #5c7cfa;
+        }
+
+        .navigation-arrows {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            z-index: 3;
+            pointer-events: none;
+            padding: 0 30px;
+        }
+
+        .arrow {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .arrow:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .arrow.left {
+            left: 30px;
+        }
+
+        .arrow.right {
+            right: 30px;
+        }
+
+        .arrow img {
+            width: 35px;
+            height: 35px;
+            filter: invert(1);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo-section">
+                <a href="index.html" class="logo-text">Cubi GDPS</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="rating-system.html" class="active">Rating System</a></li>
+                <li><a href="lvlreq.html">Level Request</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="nav-buttons">
+        <a href="#" class="nav-button active">
+            <img src="imgassets/starrate.png" alt="Star">
+            Star Rate
+        </a>
+        <a href="#" class="nav-button">
+            <img src="imgassets/featurerate.png" alt="Featured">
+            Featured Rate
+        </a>
+        <a href="#" class="nav-button">
+            <img src="imgassets/epicrate.png" alt="Epic">
+            Epic Rate
+        </a>
+        <a href="#" class="nav-button">
+            <img src="imgassets/legendaryrate.png" alt="Legendary">
+            Legendary Rate
+        </a>
+        <a href="#" class="nav-button">
+            <img src="imgassets/mythicrate.png" alt="Mythic">
+            Mythic Rate
+        </a>
+        <a href="#" class="nav-button">
+            <img src="imgassets/reupload.png" alt="Reupload">
+            Reupload Rate
+        </a>
+    </div>
+
+    <div class="rating-container">
+        <span class="close-btn" title="Return to main page">×</span>
+        <h1>Cubi GDPS Rating System</h1>
+        <p class="description">Browse the Cubi GDPS rating system and its updates</p>
+        
+        <div class="progress-item">
+            <span class="progress-label">Layout <span class="progress-text">50%</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 50%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <span class="progress-label">Decorations <span class="progress-text">75%</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 75%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <span class="progress-label">Gameplay <span class="progress-text">90%</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 90%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <span class="progress-label">Effects <span class="progress-text">75%</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 75%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <span class="progress-label">Impressions <span class="progress-text">90%</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 90%"></div>
+            </div>
+        </div>
+
+        <div class="progress-item">
+            <span class="progress-label">Time <span class="progress-text">30+ seconds</span></span>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation-arrows">
+        <div class="arrow left">
+            <img src="imgassets/arrow-left.png" alt="Previous">
+        </div>
+        <div class="arrow right">
+            <img src="imgassets/arrow-right.png" alt="Next">
+        </div>
+    </div>
+
+    <div class="footer">
+        by <span>ayrich</span> <a href="https://discord.gg/F5aubDmgsm" target="_blank">[cubi gdps]</a>
+    </div>
+
+    <script src="rating-bar.js"></script>
+</body>
+</html>
