@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Level Request - Cubi GDPS</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary-color: rgba(43, 45, 49, 0.95);
@@ -394,10 +395,10 @@
         <div id="loginSection">
             <h2>Level Request System</h2>
             <p style="margin-bottom: 2rem; color: #ccc;">Please login with Discord to submit your level</p>
-            <a href="#" class="discord-btn" onclick="loginWithDiscord()">
+            <button class="discord-btn" onclick="loginWithDiscord()">
                 <i class="fab fa-discord"></i>
                 Login with Discord
-            </a>
+            </button>
         </div>
 
         <div id="userProfile" class="user-profile">
@@ -448,91 +449,89 @@
         </form>
     </div>
 
-    <script src="https://kit.fontawesome.com/your-font-awesome-kit.js"></script>
     <script>
         const DISCORD_CLIENT_ID = '1363791587225895013';
         const DISCORD_REDIRECT_URI = 'https://gdps.ayrich.fun/lvlreq.html';
-        const API_URL = '/api/level-request'; // URL для API бота
-        
-        let lastRequestTime = localStorage.getItem('lastRequestTime');
+        const DISCORD_CLIENT_SECRET = '6Z5UD-qvbWNIx21f1zWDx8n4zUElBroru';
 
-        function checkCooldown() {
-            if (!lastRequestTime) return true;
-            
-            const now = Date.now();
-            const timePassed = now - parseInt(lastRequestTime);
-            const fourHours = 4 * 60 * 60 * 1000;
-            
-            return timePassed >= fourHours;
-        }
+        function loginWithDiscord() {
+            const params = new URLSearchParams({
+                client_id: DISCORD_CLIENT_ID,
+                redirect_uri: DISCORD_REDIRECT_URI,
+                response_type: 'code',
+                scope: 'identify'
+            });
 
-        // Функция для получения параметров из URL
-        function getUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                code: params.get('code'),
-                error: params.get('error')
-            };
+            window.location.href = `https://discord.com/api/oauth2/authorize?${params}`;
         }
 
         // Проверяем авторизацию при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
-            const params = getUrlParams();
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
             
-            // Если есть код авторизации в URL
-            if (params.code) {
+            if (code) {
                 try {
-                    // Обмениваем код на токен
+                    console.log('Получен код авторизации:', code);
+                    
+                    const tokenData = {
+                        client_id: DISCORD_CLIENT_ID,
+                        client_secret: DISCORD_CLIENT_SECRET,
+                        grant_type: 'authorization_code',
+                        code: code,
+                        redirect_uri: DISCORD_REDIRECT_URI
+                    };
+
+                    console.log('Отправляем запрос на получение токена:', tokenData);
+
                     const response = await fetch('https://discord.com/api/oauth2/token', {
                         method: 'POST',
-                        body: new URLSearchParams({
-                            client_id: DISCORD_CLIENT_ID,
-                            client_secret: '6Z5UD-qvbWNIx21f1zWDx8n4zUElBroru',
-                            grant_type: 'authorization_code',
-                            code: params.code,
-                            redirect_uri: DISCORD_REDIRECT_URI
-                        }),
+                        body: new URLSearchParams(tokenData),
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         }
                     });
 
-                    const data = await response.json();
-                    
-                    if (data.error) {
-                        throw new Error(data.error_description || 'Failed to get access token');
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Ошибка получения токена:', response.status, errorText);
+                        throw new Error(`Ошибка получения токена: ${response.status} ${errorText}`);
                     }
-                    
+
+                    const data = await response.json();
+                    console.log('Получен ответ с токеном:', data);
+
+                    if (data.error) {
+                        throw new Error(`Ошибка Discord: ${data.error_description || data.error}`);
+                    }
+
                     // Получаем информацию о пользователе
                     const userResponse = await fetch('https://discord.com/api/users/@me', {
                         headers: {
-                            Authorization: `Bearer ${data.access_token}`
+                            'Authorization': `Bearer ${data.access_token}`
                         }
                     });
-                    
-                    const userData = await userResponse.json();
-                    
-                    if (userData.error) {
-                        throw new Error(userData.error_description || 'Failed to get user data');
+
+                    if (!userResponse.ok) {
+                        throw new Error(`Ошибка получения данных пользователя: ${userResponse.status}`);
                     }
-                    
-                    // Сохраняем данные пользователя и токен
-                    const userInfo = {
+
+                    const userData = await userResponse.json();
+                    console.log('Получены данные пользователя:', userData);
+
+                    localStorage.setItem('discord_user', JSON.stringify({
                         ...userData,
                         access_token: data.access_token
-                    };
-                    
-                    localStorage.setItem('discord_user', JSON.stringify(userInfo));
-                    showUserProfile(userInfo);
-                    
-                    // Очищаем URL от параметров авторизации
+                    }));
+
+                    showUserProfile(userData);
                     window.history.replaceState({}, document.title, '/lvlreq.html');
                 } catch (error) {
-                    console.error('Auth error:', error);
-                    alert('Ошибка авторизации. Пожалуйста, попробуйте снова.');
+                    console.error('Ошибка авторизации:', error);
+                    alert(`Ошибка авторизации: ${error.message}`);
+                    logout();
                 }
             } else {
-                // Проверяем сохраненные данные
                 const userData = localStorage.getItem('discord_user');
                 if (userData) {
                     showUserProfile(JSON.parse(userData));
@@ -540,23 +539,11 @@
             }
         });
 
-        function loginWithDiscord() {
-            const params = new URLSearchParams({
-                client_id: DISCORD_CLIENT_ID,
-                redirect_uri: DISCORD_REDIRECT_URI,
-                response_type: 'code',
-                scope: 'identify email guilds'
-            });
-
-            window.location.href = `https://discord.com/api/oauth2/authorize?${params}`;
-        }
-
         function showUserProfile(user) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('userProfile').classList.add('visible');
             document.getElementById('welcomeContainer').style.display = 'block';
 
-            // Обновляем все элементы с аватаркой и именем пользователя
             const avatarUrl = user.avatar 
                 ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` 
                 : 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -571,22 +558,6 @@
         }
 
         function logout() {
-            const userData = JSON.parse(localStorage.getItem('discord_user'));
-            if (userData && userData.access_token) {
-                // Отзываем токен на стороне Discord
-                fetch('https://discord.com/api/oauth2/token/revoke', {
-                    method: 'POST',
-                    body: new URLSearchParams({
-                        token: userData.access_token,
-                        client_id: DISCORD_CLIENT_ID,
-                        client_secret: '6Z5UD-qvbWNIx21f1zWDx8n4zUElBroru'
-                    }),
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                }).catch(console.error);
-            }
-            
             localStorage.removeItem('discord_user');
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('userProfile').classList.remove('visible');
@@ -636,7 +607,7 @@
             };
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch('/api/level-request', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
