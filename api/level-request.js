@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { Client, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 
-const REQUESTS_CHANNEL_ID = ''; // ID канала для запросов
-const MOD_ROLE_ID = ''; // ID роли модераторов
+const REQUESTS_CHANNEL_ID = '1363896964638572685'; // ID канала для запросов
+const MOD_ROLE_ID = '1363525627055177851'; // ID роли модераторов
 
 // Middleware для проверки токена Discord
 const verifyDiscordToken = async (req, res, next) => {
