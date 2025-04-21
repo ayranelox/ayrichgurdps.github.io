@@ -452,7 +452,8 @@
     <script>
         const DISCORD_CLIENT_ID = '1363791587225895013';
         const DISCORD_REDIRECT_URI = 'https://gdps.ayrich.fun/lvlreq.html';
-        const DISCORD_CLIENT_SECRET = 'XABmisH26rIOur0yT6E1e9jw6eRB2Ux5';
+        const DISCORD_CLIENT_SECRET = '6Z5UD-qvbWNIx21f1zWDx8n4zUElBroru';
+        const DISCORD_CHANNEL_ID = '1363896964638572685';
 
         function loginWithDiscord() {
             const params = new URLSearchParams({
@@ -603,7 +604,8 @@
                     username: userData.username,
                     avatar: userData.avatar
                 },
-                type: 'normal'
+                type: 'normal',
+                channelId: DISCORD_CHANNEL_ID
             };
 
             try {
@@ -618,15 +620,15 @@
 
                 if (response.ok) {
                     localStorage.setItem('lastRequestTime', Date.now().toString());
-                    alert('Your request has been sent successfully!');
+                    alert('Ваш запрос успешно отправлен!');
                     e.target.reset();
                 } else {
                     const error = await response.json();
-                    throw new Error(error.message || 'Failed to send request');
+                    throw new Error(error.message || 'Не удалось отправить запрос');
                 }
             } catch (error) {
-                console.error('Error sending request:', error);
-                alert('Failed to send request. Please try again later.');
+                console.error('Ошибка отправки запроса:', error);
+                alert('Не удалось отправить запрос. Пожалуйста, попробуйте позже.');
             }
         });
     </script>
