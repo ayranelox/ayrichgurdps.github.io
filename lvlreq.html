@@ -454,6 +454,15 @@
         const DISCORD_REDIRECT_URI = 'https://gdps.ayrich.fun/lvlreq.html';
         const DISCORD_CLIENT_SECRET = '6Z5UD-qvbWNIx21f1zWDx8n4zUElBroru';
         const DISCORD_CHANNEL_ID = '1363896964638572685';
+        const COOLDOWN_TIME = 4 * 60 * 60 * 1000; // 4 часа в миллисекундах
+
+        function checkCooldown() {
+            const lastRequestTime = localStorage.getItem('lastRequestTime');
+            if (!lastRequestTime) return true;
+
+            const timeSinceLastRequest = Date.now() - parseInt(lastRequestTime);
+            return timeSinceLastRequest >= COOLDOWN_TIME;
+        }
 
         function loginWithDiscord() {
             const params = new URLSearchParams({
