@@ -607,17 +607,11 @@
             const levelData = {
                 name: document.getElementById('levelName').value,
                 id: document.getElementById('levelId').value,
-                difficulty: document.getElementById('difficulty').value,
-                user: {
-                    id: userData.id,
-                    username: userData.username,
-                    avatar: userData.avatar
-                },
-                channelId: DISCORD_CHANNEL_ID
+                difficulty: document.getElementById('difficulty').value
             };
 
             try {
-                const response = await fetch('https://gdps.ayrich.fun/api/level-request', {
+                const response = await fetch('http://localhost:3000/api/level-request', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -626,17 +620,23 @@
                     body: JSON.stringify(levelData)
                 });
 
-                if (response.ok) {
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Не удалось отправить запрос');
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
                     localStorage.setItem('lastRequestTime', Date.now().toString());
                     alert('Ваш запрос успешно отправлен!');
                     e.target.reset();
                 } else {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Не удалось отправить запрос');
+                    throw new Error('Не удалось отправить запрос');
                 }
             } catch (error) {
                 console.error('Ошибка отправки запроса:', error);
-                alert('Не удалось отправить запрос. Пожалуйста, попробуйте позже.');
+                alert(`Ошибка: ${error.message}`);
             }
         });
     </script>
