@@ -641,23 +641,38 @@
                         'Content-Type': 'application/json',
                         'discord-token': userData.access_token
                     },
+                    mode: 'no-cors',
                     body: JSON.stringify(levelData)
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || errorData.message || 'Не удалось отправить запрос');
+                    try {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || errorData.message || 'Не удалось отправить запрос');
+                    } catch (e) {
+                        throw new Error('Не удалось отправить запрос');
+                    }
                 }
 
-                const responseData = await response.json();
-                
-                if (responseData.success) {
-                    localStorage.setItem('lastRequestTime', Date.now().toString());
-                    alert('Ваш запрос успешно отправлен!');
-                    e.target.reset();
-                    document.getElementById('normalRequestForm').classList.remove('visible');
-                } else {
-                    throw new Error('Не удалось отправить запрос');
+                try {
+                    const responseData = await response.json();
+                    if (responseData.success) {
+                        localStorage.setItem('lastRequestTime', Date.now().toString());
+                        alert('Ваш запрос успешно отправлен!');
+                        e.target.reset();
+                        document.getElementById('normalRequestForm').classList.remove('visible');
+                    } else {
+                        throw new Error('Не удалось отправить запрос');
+                    }
+                } catch (e) {
+                    if (response.status === 200) {
+                        localStorage.setItem('lastRequestTime', Date.now().toString());
+                        alert('Ваш запрос успешно отправлен!');
+                        e.target.reset();
+                        document.getElementById('normalRequestForm').classList.remove('visible');
+                    } else {
+                        throw new Error('Не удалось отправить запрос');
+                    }
                 }
             } catch (error) {
                 console.error('Error sending request:', error);
