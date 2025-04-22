@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const config = require('../config.json');
+
+// ID канала для запросов уровней
+const LEVEL_REQUEST_CHANNEL_ID = '1363896964638572685'; // Замените на ваш ID канала
 
 // Middleware для проверки Discord токена
 const verifyDiscordToken = (req, res, next) => {
@@ -21,7 +23,7 @@ router.post('/', verifyDiscordToken, async (req, res) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
-        const channel = global.client.channels.cache.get(config.levelRequestChannel);
+        const channel = global.client.channels.cache.get(LEVEL_REQUEST_CHANNEL_ID);
         if (!channel) {
             return res.status(500).json({ error: 'Channel not found' });
         }
