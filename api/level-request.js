@@ -10,53 +10,70 @@ const LEVEL_REQUEST_CHANNEL_ID = '1363896964638572685';
 
 // Настройка CORS
 const corsOptions = {
-    origin: true, // Разрешаем все источники
+    origin: true,
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'discord-token'],
     credentials: true,
-    maxAge: 86400 // Кэширование preflight запросов на 24 часа
+    maxAge: 86400
 };
 
-// Применяем CORS ко всем маршрутам
+// Применяем CORS и парсер JSON
 router.use(cors(corsOptions));
+router.use(express.json());
 
 // Middleware для проверки Discord токена
 function verifyDiscordToken(req, res, next) {
-    const token = req.headers['discord-token'];
-    if (!token) {
-        return res.status(401).json({ error: 'Discord token is required' });
+    try {
+        const token = req.headers['discord-token'];
+        if (!token) {
+            return res.status(401).json({ error: 'Discord token is required' });
+        }
+        next();
+    } catch (error) {
+        console.error('Token verification error:', error);
+        res.status(500).json({ error: 'Internal server error during token verification' });
     }
-    next();
 }
 
 // Обработчик GET запроса для проверки работоспособности
 router.get('/', (req, res) => {
-    res.json({ status: 'ok', message: 'Level request API is working' });
+    try {
+        res.json({ status: 'ok', message: 'Level request API is working' });
+    } catch (error) {
+        console.error('Health check error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // POST обработчик для запросов уровней
 router.post('/', verifyDiscordToken, async (req, res) => {
     try {
+        console.log('Received request body:', req.body);
+        
         const { levelName, levelId, difficulty } = req.body;
-        console.log('Received request:', { levelName, levelId, difficulty }); // Добавляем логирование
 
         if (!levelName || !levelId || !difficulty) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        if (!global.client) {
+            console.error('Discord client is not initialized');
+            return res.status(500).json({ error: 'Discord client is not available' });
+        }
+
         const channel = global.client.channels.cache.get(LEVEL_REQUEST_CHANNEL_ID);
         if (!channel) {
-            console.error('Channel not found:', LEVEL_REQUEST_CHANNEL_ID); // Добавляем логирование
-            return res.status(500).json({ error: 'Channel not found' });
+            console.error('Channel not found:', LEVEL_REQUEST_CHANNEL_ID);
+            return res.status(500).json({ error: 'Discord channel not found' });
         }
 
         const embed = new EmbedBuilder()
             .setColor('#0099ff')
             .setTitle('New Level Request')
             .addFields(
-                { name: 'Level Name', value: levelName },
-                { name: 'Level ID', value: levelId },
-                { name: 'Requested Difficulty', value: difficulty }
+                { name: 'Level Name', value: levelName.toString() },
+                { name: 'Level ID', value: levelId.toString() },
+                { name: 'Requested Difficulty', value: difficulty.toString() }
             )
             .setTimestamp();
 
@@ -73,14 +90,17 @@ router.post('/', verifyDiscordToken, async (req, res) => {
             );
 
         await channel.send({ embeds: [embed], components: [row] });
-        console.log('Message sent to Discord successfully'); // Добавляем логирование
-        res.json({ success: true });
+        console.log('Message sent to Discord successfully');
+        
+        res.json({ success: true, message: 'Level request sent successfully' });
 
     } catch (error) {
         console.error('Error processing level request:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ 
+            error: 'Internal server error',
+            message: error.message
+        });
     }
 });
 
-// Экспортируем роутер
 module.exports = router; 
