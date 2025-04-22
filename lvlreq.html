@@ -618,12 +618,6 @@
         document.getElementById('normalRequestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            /* COOLDOWN CHECK - Temporarily disabled for testing
-            if (!checkCooldown()) {
-                return;
-            }
-            */
-
             const userData = JSON.parse(localStorage.getItem('discord_user'));
             
             if (!userData || !userData.access_token) {
@@ -633,39 +627,39 @@
             }
 
             const levelData = {
-                name: document.getElementById('levelName').value,
-                id: document.getElementById('levelId').value,
+                levelName: document.getElementById('levelName').value,
+                levelId: document.getElementById('levelId').value,
                 difficulty: document.getElementById('difficulty').value
             };
 
             try {
+                console.log('Sending request with data:', levelData);
+                
                 const response = await fetch('https://gdps.ayrich.fun/api/level-request', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'discord-token': userData.access_token
                     },
-                    credentials: 'include',
                     body: JSON.stringify(levelData)
                 });
 
+                const responseData = await response.json();
+                
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Failed to send request');
+                    throw new Error(responseData.error || responseData.message || 'Failed to send request');
                 }
 
-                const data = await response.json();
-                
-                if (data.success) {
+                if (responseData.success) {
                     localStorage.setItem('lastRequestTime', Date.now().toString());
-                    alert('Your request has been sent successfully!');
+                    alert('Ваш запрос успешно отправлен!');
                     e.target.reset();
                 } else {
-                    throw new Error('Failed to send request');
+                    throw new Error('Не удалось отправить запрос');
                 }
             } catch (error) {
                 console.error('Error sending request:', error);
-                alert(`Error: ${error.message}`);
+                alert(`Ошибка: ${error.message}`);
             }
         });
     </script>
