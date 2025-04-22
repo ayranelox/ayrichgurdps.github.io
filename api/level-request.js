@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Client, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 
 const REQUESTS_CHANNEL_ID = '1363896964638572685'; // ID канала для запросов
 const MOD_ROLE_ID = '1363525627055177851'; // ID роли модераторов
@@ -33,47 +33,47 @@ const verifyDiscordToken = async (req, res, next) => {
 
 router.post('/', verifyDiscordToken, async (req, res) => {
     try {
-        const { name, id, difficulty, user, channelId } = req.body;
-        
-        // Проверяем авторизацию
-        const token = req.headers.authorization?.split(' ')[1];
-        if (!token) {
-            return res.status(401).json({ message: 'Не авторизован' });
+        const { name, id, difficulty } = req.body;
+        const user = req.user;
+
+        if (!name || !id || !difficulty) {
+            return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // Создаем сообщение для отправки
-        const message = {
-            embeds: [{
-                title: '🎮 Новый запрос уровня!',
-                color: 0x5865F2,
-                fields: [
-                    {
-                        name: '📝 Название',
-                        value: name,
-                        inline: true
-                    },
-                    {
-                        name: '🔢 ID уровня',
-                        value: id,
-                        inline: true
-                    },
-                    {
-                        name: '⭐ Сложность',
-                        value: difficulty,
-                        inline: true
-                    }
-                ],
-                author: {
-                    name: user.username,
-                    icon_url: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'
-                },
-                timestamp: new Date().toISOString()
-            }]
-        };
+        const embed = new EmbedBuilder()
+            .setTitle('🎮 Новый запрос уровня!')
+            .setColor(0x5865F2)
+            .addFields(
+                { name: '📝 Название', value: name, inline: true },
+                { name: '🔢 ID уровня', value: id, inline: true },
+                { name: '⭐ Сложность', value: difficulty, inline: true }
+            )
+            .setAuthor({
+                name: user.username,
+                iconURL: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'
+            })
+            .setTimestamp();
+
+        // Создаем кнопки
+        const acceptButton = new ButtonBuilder()
+            .setCustomId(`accept_${id}`)
+            .setLabel('Принять')
+            .setStyle(ButtonStyle.Success);
+
+        const rejectButton = new ButtonBuilder()
+            .setCustomId(`reject_${id}`)
+            .setLabel('Отклонить')
+            .setStyle(ButtonStyle.Danger);
+
+        const row = new ActionRowBuilder()
+            .addComponents(acceptButton, rejectButton);
 
         // Получаем канал и отправляем сообщение
-        const channel = await global.client.channels.fetch(channelId);
-        await channel.send(message);
+        const channel = await global.client.channels.fetch('1363896964638572685');
+        await channel.send({
+            embeds: [embed],
+            components: [row]
+        });
 
         res.json({ success: true });
     } catch (error) {
