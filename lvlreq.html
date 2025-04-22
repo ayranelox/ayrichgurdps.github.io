@@ -635,26 +635,27 @@
             try {
                 console.log('Sending request with data:', levelData);
                 
-                const response = await fetch('https://gdps-av6o0z5m0-ayraneloxs-projects.vercel.app/api/level-request.js', {
+                const response = await fetch('https://gdps-av6o0z5m0-ayraneloxs-projects.vercel.app/level-request.js', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'discord-token': userData.access_token
                     },
-                    credentials: 'include',
                     body: JSON.stringify(levelData)
                 });
 
-                const responseData = await response.json();
-                
                 if (!response.ok) {
-                    throw new Error(responseData.error || responseData.message || 'Failed to send request');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || errorData.message || 'Не удалось отправить запрос');
                 }
 
+                const responseData = await response.json();
+                
                 if (responseData.success) {
                     localStorage.setItem('lastRequestTime', Date.now().toString());
                     alert('Ваш запрос успешно отправлен!');
                     e.target.reset();
+                    document.getElementById('normalRequestForm').classList.remove('visible');
                 } else {
                     throw new Error('Не удалось отправить запрос');
                 }
