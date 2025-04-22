@@ -9,15 +9,15 @@ const router = express.Router();
 const LEVEL_REQUEST_CHANNEL_ID = '1363896964638572685';
 
 // Настройка CORS
-router.use(cors({
+const corsOptions = {
     origin: ['https://gdps.ayrich.fun', 'http://localhost:3000'],
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'discord-token'],
     credentials: true
-}));
+};
 
-// Обработка OPTIONS запросов
-router.options('*', cors());
+// Применяем CORS ко всем маршрутам
+router.use(cors(corsOptions));
 
 // Middleware для проверки Discord токена
 function verifyDiscordToken(req, res, next) {
