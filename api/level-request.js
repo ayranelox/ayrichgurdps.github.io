@@ -1,18 +1,37 @@
 const express = require('express');
-const router = express.Router();
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const cors = require('cors');
+
+// Создаем роутер
+const router = express.Router();
 
 // ID канала для запросов уровней
-const LEVEL_REQUEST_CHANNEL_ID = '1363896964638572685'; // Замените на ваш ID канала
+const LEVEL_REQUEST_CHANNEL_ID = '1363896964638572685';
+
+// Настройка CORS
+router.use(cors({
+    origin: ['https://gdps.ayrich.fun', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'discord-token'],
+    credentials: true
+}));
+
+// Обработка OPTIONS запросов
+router.options('*', cors());
 
 // Middleware для проверки Discord токена
-const verifyDiscordToken = (req, res, next) => {
+function verifyDiscordToken(req, res, next) {
     const token = req.headers['discord-token'];
     if (!token) {
         return res.status(401).json({ error: 'Discord token is required' });
     }
     next();
-};
+}
+
+// Обработчик GET запроса для проверки работоспособности
+router.get('/', (req, res) => {
+    res.json({ status: 'ok', message: 'Level request API is working' });
+});
 
 // POST обработчик для запросов уровней
 router.post('/', verifyDiscordToken, async (req, res) => {
@@ -59,4 +78,5 @@ router.post('/', verifyDiscordToken, async (req, res) => {
     }
 });
 
+// Экспортируем роутер
 module.exports = router; 
