@@ -1,84 +1,59 @@
 const express = require('express');
 const router = express.Router();
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const config = require('../config.json');
 
-const REQUESTS_CHANNEL_ID = '1363896964638572685'; // ID канала для запросов
-const MOD_ROLE_ID = '1363525627055177851'; // ID роли модераторов
-
-// Middleware для проверки токена Discord
-const verifyDiscordToken = async (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
+// Middleware для проверки Discord токена
+const verifyDiscordToken = (req, res, next) => {
+    const token = req.headers['discord-token'];
     if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
+        return res.status(401).json({ error: 'Discord token is required' });
     }
-
-    try {
-        // Проверяем токен через Discord API
-        const response = await fetch('https://discord.com/api/users/@me', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Invalid token');
-        }
-
-        const userData = await response.json();
-        req.user = userData;
-        next();
-    } catch (error) {
-        console.error('Token verification error:', error);
-        res.status(401).json({ message: 'Invalid token' });
-    }
+    next();
 };
 
+// POST обработчик для запросов уровней
 router.post('/', verifyDiscordToken, async (req, res) => {
     try {
-        const { name, id, difficulty } = req.body;
-        const user = req.user;
+        const { levelName, levelId, difficulty } = req.body;
 
-        if (!name || !id || !difficulty) {
-            return res.status(400).json({ message: 'Missing required fields' });
+        if (!levelName || !levelId || !difficulty) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const channel = global.client.channels.cache.get(config.levelRequestChannel);
+        if (!channel) {
+            return res.status(500).json({ error: 'Channel not found' });
         }
 
         const embed = new EmbedBuilder()
-            .setTitle('🎮 Новый запрос уровня!')
-            .setColor(0x5865F2)
+            .setColor('#0099ff')
+            .setTitle('New Level Request')
             .addFields(
-                { name: '📝 Название', value: name, inline: true },
-                { name: '🔢 ID уровня', value: id, inline: true },
-                { name: '⭐ Сложность', value: difficulty, inline: true }
+                { name: 'Level Name', value: levelName },
+                { name: 'Level ID', value: levelId },
+                { name: 'Requested Difficulty', value: difficulty }
             )
-            .setAuthor({
-                name: user.username,
-                iconURL: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'
-            })
             .setTimestamp();
 
-        // Создаем кнопки
-        const acceptButton = new ButtonBuilder()
-            .setCustomId(`accept_${id}`)
-            .setLabel('Принять')
-            .setStyle(ButtonStyle.Success);
-
-        const rejectButton = new ButtonBuilder()
-            .setCustomId(`reject_${id}`)
-            .setLabel('Отклонить')
-            .setStyle(ButtonStyle.Danger);
-
         const row = new ActionRowBuilder()
-            .addComponents(acceptButton, rejectButton);
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('accept')
+                    .setLabel('Accept')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('reject')
+                    .setLabel('Reject')
+                    .setStyle(ButtonStyle.Danger)
+            );
 
-        // Получаем канал и отправляем сообщение
-        const channel = await global.client.channels.fetch('1363896964638572685');
-        await channel.send({
-            embeds: [embed],
-            components: [row]
-        });
-
+        await channel.send({ embeds: [embed], components: [row] });
         res.json({ success: true });
+
     } catch (error) {
-        console.error('Ошибка при обработке запроса:', error);
-        res.status(500).json({ message: 'Внутренняя ошибка сервера' });
+        console.error('Error processing level request:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
