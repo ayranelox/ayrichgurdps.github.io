@@ -10,10 +10,11 @@ const LEVEL_REQUEST_CHANNEL_ID = '1363896964638572685';
 
 // Настройка CORS
 const corsOptions = {
-    origin: ['https://gdps.ayrich.fun', 'http://localhost:3000'],
+    origin: true, // Разрешаем все источники
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'discord-token'],
-    credentials: true
+    credentials: true,
+    maxAge: 86400 // Кэширование preflight запросов на 24 часа
 };
 
 // Применяем CORS ко всем маршрутам
@@ -37,6 +38,7 @@ router.get('/', (req, res) => {
 router.post('/', verifyDiscordToken, async (req, res) => {
     try {
         const { levelName, levelId, difficulty } = req.body;
+        console.log('Received request:', { levelName, levelId, difficulty }); // Добавляем логирование
 
         if (!levelName || !levelId || !difficulty) {
             return res.status(400).json({ error: 'Missing required fields' });
@@ -44,6 +46,7 @@ router.post('/', verifyDiscordToken, async (req, res) => {
 
         const channel = global.client.channels.cache.get(LEVEL_REQUEST_CHANNEL_ID);
         if (!channel) {
+            console.error('Channel not found:', LEVEL_REQUEST_CHANNEL_ID); // Добавляем логирование
             return res.status(500).json({ error: 'Channel not found' });
         }
 
@@ -70,6 +73,7 @@ router.post('/', verifyDiscordToken, async (req, res) => {
             );
 
         await channel.send({ embeds: [embed], components: [row] });
+        console.log('Message sent to Discord successfully'); // Добавляем логирование
         res.json({ success: true });
 
     } catch (error) {
