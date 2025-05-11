@@ -132,123 +132,77 @@ h1 {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
     z-index: 1000;
-    backdrop-filter: blur(5px);
 }
 
 .modal-content {
-    background-color: var(--card-background);
-    margin: 15% auto;
-    padding: 2rem;
+    background-color: #1a1a1a;
+    padding: 30px;
     border-radius: 15px;
-    width: 90%;
-    max-width: 600px;
     position: relative;
-    animation: modalSlideIn 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-    from {
-        transform: translateY(-100px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .close-btn {
     position: absolute;
-    right: 1.5rem;
-    top: 1rem;
-    font-size: 2rem;
+    right: 20px;
+    top: 15px;
+    font-size: 24px;
     cursor: pointer;
-    color: #888;
-    transition: color 0.3s ease;
+    color: #666;
+    transition: color 0.3s;
 }
 
 .close-btn:hover {
-    color: var(--text-color);
-}
-
-.modal h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: var(--text-color);
+    color: #fff;
 }
 
 .platform-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
 }
 
 .platform-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2rem;
-    border-radius: 12px;
-    text-decoration: none;
-    color: var(--text-color);
-    transition: all 0.3s ease;
-    background-color: var(--card-background);
-    border: 2px solid transparent;
+    padding: 20px;
+    border: 2px solid #333;
+    border-radius: 10px;
+    background-color: #2a2a2a;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 150px;
 }
 
 .platform-btn:hover {
-    transform: translateY(-5px);
-    border-color: currentColor;
-}
-
-.windows-btn:hover {
-    color: var(--windows-color);
-    box-shadow: 0 5px 15px rgba(0, 164, 239, 0.2);
-}
-
-.android-btn:hover {
-    color: var(--android-color);
-    box-shadow: 0 5px 15px rgba(61, 220, 132, 0.2);
+    background-color: #333;
+    border-color: #666;
+    transform: translateY(-2px);
 }
 
 .platform-icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 1rem;
-    fill: currentColor;
-    transition: transform 0.3s ease;
-}
-
-.platform-btn:hover .platform-icon {
-    transform: scale(1.1);
+    width: 48px;
+    height: 48px;
+    margin-bottom: 10px;
 }
 
 .platform-btn span {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
+    font-size: 16px;
+    color: #fff;
 }
 
-/* Специфичные стили для каждой платформы */
-.windows-btn .platform-icon {
-    width: 44px;
-}
-
-.android-btn .platform-icon {
-    width: 56px; /* Увеличил размер для лучшей видимости */
-    padding: 4px; /* Добавил отступ для баланса */
-}
-
-.ios-btn .platform-icon {
-    width: 42px;
-}
-
-/* Дополнительные стили для кнопок платформ */
-.android-btn:hover {
-    background-color: var(--android-color) !important;
-    box-shadow: 0 0 15px rgba(61, 220, 132, 0.3);
+.modal h2 {
+    color: #fff;
+    margin-bottom: 20px;
+    font-size: 24px;
 }
 
 /* Stats Section */
@@ -329,4 +283,34 @@ footer p {
         margin: 30% auto;
         width: 95%;
     }
+}
+
+/* Индивидуальные стили для платформ */
+.windows-btn {
+    background-color: #2a2a2a;
+    border-color: #333;
+}
+.windows-btn:hover {
+    background-color: #00A4EF !important;
+    border-color: #00A4EF !important;
+}
+.windows-btn:hover .platform-icon {
+    fill: #fff;
+}
+.windows-btn:hover span {
+    color: #fff;
+}
+.android-btn {
+    background-color: #2a2a2a;
+    border-color: #333;
+}
+.android-btn:hover {
+    background-color: #3DDC84 !important;
+    border-color: #3DDC84 !important;
+}
+.android-btn:hover .platform-icon {
+    fill: #fff;
+}
+.android-btn:hover span {
+    color: #fff;
 } 
