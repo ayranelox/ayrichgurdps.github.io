@@ -29,8 +29,8 @@ window.onclick = function(event) {
 // Функция для скачивания в зависимости от платформы
 function downloadForPlatform(platform) {
     const files = {
-        'windows': 'assets/Cubi GDPS.zip',
-        'android': 'assets/Cubi GDPS.apk'
+        'windows': 'https://github.com/ayranelox/gdps4444/releases/download/fr/CubiGDPS.zip',
+        'android': 'https://github.com/ayranelox/gdps4444/releases/download/fr/CubiGDPS.apk'
     };
 
     if (files[platform]) {
